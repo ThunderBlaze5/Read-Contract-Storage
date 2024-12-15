@@ -1,0 +1,54 @@
+from web3 import Web3
+import json
+
+# Connect to an Ethereum node (e.g., Infura, Alchemy, or a local node)
+infura_url = "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
+web3 = Web3(Web3.HTTPProvider(infura_url))
+
+# Check connection
+if not web3.isConnected():
+    raise Exception("Failed to connect to the Ethereum node")
+
+# Contract details
+contract_address = web3.toChecksumAddress("0xYourContractAddress")  # Replace with your contract's address
+abi = json.loads('''[ 
+    // Add your contract's ABI here
+]''')
+
+# Create contract instance
+contract = web3.eth.contract(address=contract_address, abi=abi)
+
+# Function to check if the smart contract is valid
+def is_contract_valid(address):
+    try:
+        # Check if the address is checksummed
+        if not Web3.isAddress(address):
+            return False, "Invalid address format"
+        
+        # Check if there is bytecode at the address
+        code = web3.eth.get_code(address)
+        if code == b"":
+            return False, "No contract found at this address"
+        
+        return True, "Smart contract is valid"
+    except Exception as e:
+        return False, str(e)
+
+# Function to read storage variables
+def read_storage():
+    try:
+        # Replace 'variable_name' with the actual name of the variable in your contract
+        # Example: variable_value = contract.functions.variable_name().call()
+        variable_value = contract.functions.getYourVariable().call()  # Example function
+        print("Value of variable:", variable_value)
+
+    except Exception as e:
+        print("An error occurred:", str(e))
+
+if __name__ == "__main__":
+    # Check if the contract is valid
+    is_valid, message = is_contract_valid(contract_address)
+    print(message)
+
+    if is_valid:
+        read_storage()
